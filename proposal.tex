@@ -1,0 +1,57 @@
+
+\documentclass[12pt,letterpaper]{article}
+\usepackage[margin=1in]{geometry}
+
+
+\begin{document}
+\noindent
+William Hatch, willghatch@gmail.com \\
+\noindent
+Scotty Bauer, sbauer@eng.utah.edu \\
+\noindent
+Matt Hunsaker, matth724@gmail.com \\
+\noindent
+Network Security (CS6490) Project Proposal \\
+
+\section*{The Problem}
+
+Unix permissions are insufficient -- they are good for permissions between
+users, but do not help with the issue of a user wanting to run less-trusted
+code.  Android permissions are inflexible (IE all permissions are enumerated by
+the OS and dictated by Google), and all-or-nothing (you can't run a program
+with partial permissions), it hijacks the user/group security of Unix
+(therefore killing its usefulness as a multi-user system), and its interface is
+bad (you agree to everything up-front, out of context).  Other permissions
+systems tend to have similar limitations.
+
+\section*{Proposed Solution}
+
+We propose a novel system of parameterizable permissions for running programs
+within a permission context.  We model applications as a combination of a
+permissions context with executable code.  These permission contexts can be
+created or modified by the user to run programs in, allowing for fine-grained
+privilege control for running apps with different levels of trust and different
+areas of responsibility.  We will provide an interactive method of context
+editing so that apps can request permissions when they are required, so that
+permissions are requested to the user withinin context that they are needed.
+If permissions are denied, the application will simply receive an exception,
+and can continue to provide all other functionality that it does have
+permissions for.  Additionally we will provide non-interactive configuration
+methods more suitable for system administrators and version control.
+Permissions in this system may be either from a pre-defined set or programmer-
+defined to protect unforseen functionality.  Furthermore, our permissions will
+be parameterized by an extra argument.  This will allow for a common type of
+permission to be more granular, for example allowing access to a given sub-tree
+of the file system rather than full access to all the user's files.
+
+\section*{Plan for Implementation}
+
+We plan to develop a proof of concept for this system by implementing a Racket
+language.  This language will enforce permissions on relevant functions (such as
+file access, network access, etc), and provide functions to wrap new functionality 
+in permission checks.  We will create the various configuration formats and utilities
+for convenient use for both novice and advanced users. 
+
+
+\end{document}
+

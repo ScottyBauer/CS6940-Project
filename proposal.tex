@@ -11,18 +11,23 @@ Scotty Bauer, sbauer@eng.utah.edu \\
 \noindent
 Matt Hunsaker, matth724@gmail.com \\
 \noindent
-Network Security (CS6490) Project Proposal \\
+Network Security (CS6490) Project Proposal
 
 \section*{The Problem}
 
-Unix permissions are insufficient -- they are good for permissions between
-users, but do not help with the issue of a user wanting to run less-trusted
-code.  Android permissions are inflexible (IE all permissions are enumerated by
-the OS and dictated by Google), and all-or-nothing (you can't run a program
-with partial permissions), it hijacks the user/group security of Unix
-(therefore killing its usefulness as a multi-user system), and its interface is
-bad (you agree to everything up-front, out of context).  Other permissions
-systems tend to have similar limitations.
+Users want to run code from a myriad of sources that are often either partially
+trusted or completely untrusted.  If given full access to a user account,
+programs may access sensitive information (keys, passwords, personal
+information), may track users, or many other bad things.
+
+Unix permissions are insufficient to prevent this issue -- they are good for
+permissions between users, but do not help with the issue of a user wanting to
+run less-trusted code.  Android permissions are inflexible (IE all permissions
+are enumerated by the OS and dictated by Google), and all-or-nothing (you can't
+run a program with partial permissions), it hijacks the user/group security of
+Unix (therefore killing its usefulness as a multi-user system), and its
+interface is bad (you agree to everything up-front, out of context).  Other
+permissions systems tend to have similar issues.
 
 \section*{Proposed Solution}
 
@@ -38,11 +43,11 @@ If permissions are denied, the application will simply receive an exception,
 and can continue to provide all other functionality that it does have
 permissions for.  Additionally we will provide non-interactive configuration
 methods more suitable for system administrators and version control.
-Permissions in this system may be either from a pre-defined set or programmer-
-defined to protect unforseen functionality.  Furthermore, our permissions will
-be parameterized by an extra argument.  This will allow for a common type of
-permission to be more granular, for example allowing access to a given sub-tree
-of the file system rather than full access to all the user's files.
+Permissions in this system may be either from a pre-defined set or 
+programmer-defined to protect unforseen functionality.  Furthermore, our 
+permissions will be parameterized by an extra argument.  This will allow for
+permissions to be more granular, for example allowing access to a given
+sub-tree of the file system rather than full access to all the user's files.
 
 \section*{Plan for Implementation}
 

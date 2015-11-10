@@ -1,0 +1,4 @@
+{
+(fs-read "~")
+(fs-write "~/tmp")
+}

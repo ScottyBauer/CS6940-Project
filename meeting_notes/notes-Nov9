@@ -1,0 +1,54 @@
+Permissions:
+        * User has file that has list of permissions
+          * Configure to add more perms at runtime
+          * app would say "I need this permission"
+           * user interacts and says yes once, yes always
+          
+
+
+       * Generic permission file
+         * each app has different permissons
+           *trust app gives what ever app
+
+       * just downloaded app 
+        * want no permissions
+
+
+
+Ideas for ls:
+      read or openj file function call -- in our language
+       * hnder the hood does perm check
+        *look at perm file (do i have permission to list files in this dir)
+         * if yes 
+          *run racket opemn
+         if no  
+          return excetpion
+
+
+
+Things to do:
+* wrap the rackets IO functions
+  * read permission file
+  * throw errors
+  * call normal function return data
+
+
+
+
+s-exp permissions:
+      * list of permissions
+        * s-exp permission name and arguments
+
+        (include "/home/scotty/generic-perms")
+
+        (fs-read "/foo/bar")
+        (fs-write "/home/name")
+
+      * truested environment vars
+
+      * Read everything in home dir _except_
+         *list of secure dirs that need explicit perms to read/write
+
+      * cat and ls
+
+

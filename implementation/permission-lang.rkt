@@ -67,6 +67,7 @@
 (define p-file->value (wrap-read file->value))
 (define p-file->lines (wrap-read file->lines))
 (define p-file->bytes-lines (wrap-read file->bytes-lines))
+(define p-directory-list (wrap-read directory-list))
 
 
 
@@ -78,10 +79,13 @@
   [p-file->value file->value]
   [p-file->lines file->lines]
   [p-file->bytes-lines file->bytes-lines]
+  [p-directory-list directory-list]
   )
  (except-out
   (all-from-out racket/base)
-  open-input-file)
+  open-input-file
+  directory-list
+  )
  (except-out
   (all-from-out racket/file)
   file->string

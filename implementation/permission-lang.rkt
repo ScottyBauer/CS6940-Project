@@ -1,10 +1,18 @@
 #lang racket/base
 (require racket/file)
 (require racket/list)
+(require "file-permission-tree.rkt")
 
 
 (define permissions #f)
+(define fs-perm-tree (new-file-perm-tree))
 (define full-user-permissions? #f)
+
+(define (perms-of-type t)
+  ;; gets all permissions of a given type
+  (filter (lambda (p) (equal? (first p) t))
+          permissions))
+
 
 (define (load-permissions)
   ;; TODO - this needs to be a per-app permission file
@@ -12,15 +20,16 @@
   ;;        require form within the permissions
   (set! permissions
         (file->value (expand-user-path "~/permissions")))
+  (for ([p (perms-of-type 'fs-read)])
+    (add-to-file-perm-tree fs-perm-tree (second p) #t #f #f))
+  (for ([p (perms-of-type 'fs-write)])
+    (add-to-file-perm-tree fs-perm-tree (second p) #f #t #f))
+  (for ([p (perms-of-type 'fs-protect)])
+    (add-to-file-perm-tree fs-perm-tree (second p) #f #f #t))
   (when (not (empty? (filter (lambda (p) (equal? (first p) 'full-user-permissions))
                              permissions)))
     (set! full-user-permissions? #t)))
 (load-permissions)
-
-(define (perms-of-type t)
-  ;; gets all permissions of a given type
-  (filter (lambda (p) (equal? (first p) t))
-          permissions))
 
 (define (has-permission? perm)
   (cond [full-user-permissions? #t]
@@ -52,8 +61,10 @@
                (for/or ([d dirs])
                  (sub-path? d dir)))))
 
-(hash-set! has-permission-table 'fs-read (mk-path-perm-checker 'fs-read))
-(hash-set! has-permission-table 'fs-write (mk-path-perm-checker 'fs-write))
+;(hash-set! has-permission-table 'fs-read (mk-path-perm-checker 'fs-read))
+;(hash-set! has-permission-table 'fs-write (mk-path-perm-checker 'fs-write))
+(hash-set! has-permission-table 'fs-read (lambda (perm) (has-read? fs-perm-tree (second perm))))
+(hash-set! has-permission-table 'fs-write (lambda (perm) (has-write? fs-perm-tree (second perm))))
 
 (define (wrap-read func)
   (lambda (filename)

@@ -1,9 +1,12 @@
 #lang racket/base
 (require racket/file)
 (require racket/list)
+(require racket/path)
 (require "file-permission-tree.rkt")
 
 
+(define global-perms '())
+(define app-perms '())
 (define permissions #f)
 (define fs-perm-tree (new-file-perm-tree))
 (define full-user-permissions? #f)
@@ -13,13 +16,19 @@
   (filter (lambda (p) (equal? (first p) t))
           permissions))
 
+(define (get-app-permission-file-name)
+  (reroot-path (path->complete-path (find-system-path 'run-file)) (expand-user-path "~/app-permissions")))
 
 (define (load-permissions)
   ;; TODO - this needs to be a per-app permission file
   ;; TODO - there should be some post processing to be able to have some sort of
   ;;        require form within the permissions
-  (set! permissions
-        (file->value (expand-user-path "~/permissions")))
+  (set! global-perms
+        (with-handlers ([(λ _ #t) (λ _ '())])
+          (file->value (expand-user-path "~/permissions"))))
+  (set! app-perms (with-handlers ([(λ _ #t) (λ _ '())])
+                    (file->value (get-app-permission-file-name))))
+  (set! permissions (append global-perms app-perms))
   (for ([p (perms-of-type 'fs-read)])
     (add-to-file-perm-tree fs-perm-tree (second p) #t #f #f))
   (for ([p (perms-of-type 'fs-write)])

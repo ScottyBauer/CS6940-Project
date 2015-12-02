@@ -2,7 +2,9 @@
 (require racket/file)
 (require racket/list)
 (require racket/path)
+(require racket/match)
 (require "file-permission-tree.rkt")
+(require "gui-ask-permission.rkt")
 
 
 (define global-perms '())
@@ -29,7 +31,8 @@
 
 (define (file->perms f)
   (with-handlers ([(λ _ #t) (λ _ '())])
-    (file->value (normalize-path f))))
+    (let ((perms (file->value (normalize-path f))))
+      (if (list? perms) perms '()))))
 
 (define (update-fs-perm-tree-with-perm! p)
   (cond [(equal? (car p) 'fs-read)
@@ -66,13 +69,28 @@
     (set! full-user-permissions? #t)))
 (load-permissions!)
 
+(define (ask-user-for-permission! perm)
+  (match (gui-ask-permission perm)
+    ['yes-once #t]
+    ['yes-this-run (begin (add-runtime-perm! perm)
+                          #t)]
+    ['yes-permanent (begin (add-perm-to-app-perms-file! perm)
+                           (add-runtime-perm! perm)
+                           #t)]
+    ['no-once #f]
+    ['no-this-run #f]
+    ['no-permanent #f]
+    [else #f]
+    ))
+
 (define (has-permission? perm)
   (cond [full-user-permissions? #t]
         [(not permissions) #f]
         [else (let* ((type (first perm))
                      (check-func (hash-ref has-permission-table type #f)))
                 (if check-func
-                    (check-func perm)
+                    (or (check-func perm)
+                        (ask-user-for-permission! perm))
                     #f))]))
 
 (define has-permission-table (make-hash))

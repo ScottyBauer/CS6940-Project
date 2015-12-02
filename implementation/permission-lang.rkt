@@ -51,27 +51,6 @@
 
 (define has-permission-table (make-hash))
 
-(define (sub-path? path-a path-b)
-  ;; tell if b is a child of (or the same as) a.
-  (define (recur a b)
-    (cond [(empty? a) #t]
-          [(empty? b) #f]
-          [(equal? (first a) (first b)) (recur (rest a) (rest b))]
-          [else #f]))
-  (let ((a (explode-path (path->complete-path (expand-user-path path-a))))
-        (b (explode-path (path->complete-path (expand-user-path path-b)))))
-    (recur a b)))
-
-(define (mk-path-perm-checker type)
-  ;; for making fs-read/write permission checkers
-  (lambda (perm)
-             (let ((dir (second perm))
-                   (dirs (map second (perms-of-type type))))
-               (for/or ([d dirs])
-                 (sub-path? d dir)))))
-
-;(hash-set! has-permission-table 'fs-read (mk-path-perm-checker 'fs-read))
-;(hash-set! has-permission-table 'fs-write (mk-path-perm-checker 'fs-write))
 (hash-set! has-permission-table 'fs-read (lambda (perm) (has-read? fs-perm-tree (second perm))))
 (hash-set! has-permission-table 'fs-write (lambda (perm) (has-write? fs-perm-tree (second perm))))
 

@@ -58,7 +58,12 @@
   (lambda (filename)
     (if (has-permission? `(fs-read ,filename))
         (func filename)
-        (raise (string-append "Access denied: " filename)))))
+        (raise (string-append "Read access denied: " filename)))))
+(define (wrap-write func)
+  (lambda (val filename #:mode [mode 'binary] #:exists [exists 'error])
+    (if (has-permission? `(fs-write ,filename))
+        (func val filename #:mode mode #:exists exists)
+        (raise (string-append "Write access denied: " filename)))))
 
 (define p-open-input-file (wrap-read open-input-file))
 (define p-file->string (wrap-read file->string))
@@ -67,6 +72,9 @@
 (define p-file->lines (wrap-read file->lines))
 (define p-file->bytes-lines (wrap-read file->bytes-lines))
 (define p-directory-list (wrap-read directory-list))
+(define p-display-to-file (wrap-write display-to-file))
+(define p-write-to-file (wrap-write write-to-file))
+(define p-display-lines-to-file (wrap-write display-lines-to-file))
 
 
 
@@ -79,6 +87,9 @@
   [p-file->lines file->lines]
   [p-file->bytes-lines file->bytes-lines]
   [p-directory-list directory-list]
+  [p-display-to-file display-to-file]
+  [p-write-to-file write-to-file]
+  [p-display-lines-to-file display-lines-to-file]
   )
  (except-out
   (all-from-out racket/base)
@@ -92,6 +103,9 @@
   file->value
   file->lines
   file->bytes-lines
+  display-to-file
+  write-to-file
+  display-lines-to-file
   )
 
  permissions

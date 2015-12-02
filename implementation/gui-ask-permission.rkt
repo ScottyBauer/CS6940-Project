@@ -7,7 +7,12 @@
 
 (define (gui-ask-permission perm)
   (define answer 'no-once)
-  (define dialog (instantiate dialog% ("Example")))
+  (define dialog (new dialog%
+                      [label "Give permission?"]))
+  (define perm-message (new message%
+                            [label (format "Allow app the following permission?~n~a"
+                                           perm)]
+                            [parent dialog]))
   (define panel (new horizontal-panel% [parent dialog]
                      [alignment '(center center)]))
   (define-syntax-rule (mk-button labeltext response)

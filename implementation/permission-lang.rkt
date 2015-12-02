@@ -66,8 +66,9 @@
   (set! permissions (append global-perms app-perms))
   (for ([p permissions])
     (update-fs-perm-tree-with-perm! p))
-  (when (not (empty? (filter (lambda (p) (equal? (first p) 'full-user-permissions))
-                             permissions)))
+  (when (not (empty? (perms-of-type 'do-not-ask-user)))
+    (set! do-not-ask-user #t))
+  (when (not (empty? (perms-of-type 'full-user-permissions)))
     (set! full-user-permissions? #t)))
 (load-permissions!)
 

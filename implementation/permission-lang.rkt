@@ -16,17 +16,28 @@
   (filter (lambda (p) (equal? (first p) t))
           permissions))
 
+(define (normalize-path p)
+  (resolve-path (expand-user-path p)))
+
+(define (dirname p)
+  ;; like the unix command, only with racket paths
+  (apply build-path (reverse (cdr (reverse (explode-path p))))))
+
 (define (get-app-permission-file-name)
-  (reroot-path (path->complete-path (find-system-path 'run-file)) (expand-user-path "~/app-permissions")))
+  (reroot-path (path->complete-path (find-system-path 'run-file))
+               (normalize-path "~/app-permissions")))
 
 (define (file->perms f)
   (with-handlers ([(λ _ #t) (λ _ '())])
-    (file->value (expand-user-path f))))
+    (file->value (normalize-path f))))
 
 (define (update-fs-perm-tree-with-perm! p)
-  (cond [(equal? (car p) 'fs-read) (add-to-file-perm-tree! fs-perm-tree (second p) #t #f #f)]
-        [(equal? (car p) 'fs-write) (add-to-file-perm-tree! fs-perm-tree (second p) #f #t #f)]
-        [(equal? (car p) 'fs-protect) (add-to-file-perm-tree! fs-perm-tree (second p) #f #f #t)]
+  (cond [(equal? (car p) 'fs-read)
+         (add-to-file-perm-tree! fs-perm-tree (normalize-path (second p)) #t #f #f)]
+        [(equal? (car p) 'fs-write)
+         (add-to-file-perm-tree! fs-perm-tree (normalize-path (second p)) #f #t #f)]
+        [(equal? (car p) 'fs-protect)
+         (add-to-file-perm-tree! fs-perm-tree (normalize-path (second p)) #f #f #t)]
         [else (void)]))
 
 (define (add-runtime-perm! perm)
@@ -35,7 +46,12 @@
 
 (define (add-perm-to-app-perms-file! perm)
   (let ((app-perms (file->perms (get-app-permission-file-name))))
-    (write-to-file (cons perm app-perms) (get-app-permission-file-name))))
+    (begin
+      (make-directory* (dirname (get-app-permission-file-name)))
+      (write-to-file (cons perm app-perms)
+                     (get-app-permission-file-name)
+                     #:mode 'text
+                     #:exists 'replace))))
 
 (define (load-permissions!)
   ;; TODO - there should be some post processing to be able to have some sort of
@@ -61,8 +77,10 @@
 
 (define has-permission-table (make-hash))
 
-(hash-set! has-permission-table 'fs-read (lambda (perm) (has-read? fs-perm-tree (second perm))))
-(hash-set! has-permission-table 'fs-write (lambda (perm) (has-write? fs-perm-tree (second perm))))
+(hash-set! has-permission-table 'fs-read
+           (lambda (perm) (has-read? fs-perm-tree (normalize-path (second perm)))))
+(hash-set! has-permission-table 'fs-write
+           (lambda (perm) (has-write? fs-perm-tree (normalize-path (second perm)))))
 
 (define (wrap-read func)
   (lambda (filename)

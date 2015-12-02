@@ -19,26 +19,36 @@
 (define (get-app-permission-file-name)
   (reroot-path (path->complete-path (find-system-path 'run-file)) (expand-user-path "~/app-permissions")))
 
-(define (load-permissions)
-  ;; TODO - this needs to be a per-app permission file
+(define (file->perms f)
+  (with-handlers ([(λ _ #t) (λ _ '())])
+    (file->value (expand-user-path f))))
+
+(define (update-fs-perm-tree-with-perm! p)
+  (cond [(equal? (car p) 'fs-read) (add-to-file-perm-tree! fs-perm-tree (second p) #t #f #f)]
+        [(equal? (car p) 'fs-write) (add-to-file-perm-tree! fs-perm-tree (second p) #f #t #f)]
+        [(equal? (car p) 'fs-protect) (add-to-file-perm-tree! fs-perm-tree (second p) #f #f #t)]
+        [else (void)]))
+
+(define (add-runtime-perm! perm)
+  (set! permissions (cons perm permissions))
+  (update-fs-perm-tree-with-perm! perm))
+
+(define (add-perm-to-app-perms-file! perm)
+  (let ((app-perms (file->perms (get-app-permission-file-name))))
+    (write-to-file (cons perm app-perms) (get-app-permission-file-name))))
+
+(define (load-permissions!)
   ;; TODO - there should be some post processing to be able to have some sort of
   ;;        require form within the permissions
-  (set! global-perms
-        (with-handlers ([(λ _ #t) (λ _ '())])
-          (file->value (expand-user-path "~/permissions"))))
-  (set! app-perms (with-handlers ([(λ _ #t) (λ _ '())])
-                    (file->value (get-app-permission-file-name))))
+  (set! global-perms (file->perms "~/permissions"))
+  (set! app-perms (file->perms (get-app-permission-file-name)))
   (set! permissions (append global-perms app-perms))
-  (for ([p (perms-of-type 'fs-read)])
-    (add-to-file-perm-tree fs-perm-tree (second p) #t #f #f))
-  (for ([p (perms-of-type 'fs-write)])
-    (add-to-file-perm-tree fs-perm-tree (second p) #f #t #f))
-  (for ([p (perms-of-type 'fs-protect)])
-    (add-to-file-perm-tree fs-perm-tree (second p) #f #f #t))
+  (for ([p permissions])
+    (update-fs-perm-tree-with-perm! p))
   (when (not (empty? (filter (lambda (p) (equal? (first p) 'full-user-permissions))
                              permissions)))
     (set! full-user-permissions? #t)))
-(load-permissions)
+(load-permissions!)
 
 (define (has-permission? perm)
   (cond [full-user-permissions? #t]
@@ -108,5 +118,5 @@
   display-lines-to-file
   )
 
- permissions
+; permissions
  )

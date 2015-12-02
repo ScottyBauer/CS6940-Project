@@ -7,7 +7,7 @@
 
 (provide
  (rename-out [mk-file-perm-tree-node new-file-perm-tree])
- add-to-file-perm-tree
+ add-to-file-perm-tree!
  has-read?
  has-write?
  )
@@ -46,7 +46,7 @@
                                                 write
                                                 protect)))))))
 
-(define (add-to-file-perm-tree tree path read write protect)
+(define (add-to-file-perm-tree! tree path read write protect)
   (add-to-file-perm-tree-relative tree
                                   (explode-path (expand-user-path path))
                                   read
@@ -80,10 +80,10 @@
 (module+ test
   (require rackunit)
   (define test-perm-tree (mk-file-perm-tree-node))
-  (add-to-file-perm-tree test-perm-tree "/home/foo/secrit" #f #f #t)
-  (add-to-file-perm-tree test-perm-tree "/home/foo" #t #f #f)
-  (add-to-file-perm-tree test-perm-tree "/home/foo/writable" #f #t #f)
-  (add-to-file-perm-tree test-perm-tree "/home/foo/secrit/bar" #t #f #f)
+  (add-to-file-perm-tree! test-perm-tree "/home/foo/secrit" #f #f #t)
+  (add-to-file-perm-tree! test-perm-tree "/home/foo" #t #f #f)
+  (add-to-file-perm-tree! test-perm-tree "/home/foo/writable" #f #t #f)
+  (add-to-file-perm-tree! test-perm-tree "/home/foo/secrit/bar" #t #f #f)
 
   (check-equal? #t (has-read? test-perm-tree "/home/foo"))
   (check-equal? #f (has-read? test-perm-tree "/home/foo/secrit"))

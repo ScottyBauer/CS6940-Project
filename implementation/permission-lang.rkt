@@ -4,7 +4,7 @@
 (require racket/path)
 (require racket/match)
 (require "file-permission-tree.rkt")
-(require "gui-ask-permission.rkt")
+;(require "gui-ask-permission.rkt")
 
 
 (define global-perms '())
@@ -76,21 +76,22 @@
   (cond [do-not-ask-user #f]
         [(hash-has-key? do-not-ask-user-map perm) #f]
         [else
-         (match (gui-ask-permission perm)
-           ['yes-once #t]
-           ['yes-this-run (begin (add-runtime-perm! perm)
-                                 #t)]
-           ['yes-permanent (begin (add-perm-to-app-perms-file! perm)
-                                  (add-runtime-perm! perm)
-                                  #t)]
-           ['no-once #f]
-           ['no-this-run (begin (hash-set! do-not-ask-user-map perm #t)
-                                #f)]
-           ['no-all-this-run (begin (set! do-not-ask-user #t)
-                                    #f)]
-           ;['no-permanent #f]
-           [else #f]
-           )]))
+         (let ((gui-ask-permission (dynamic-require "gui-ask-permission.rkt" 'gui-ask-permission)))
+           (match (gui-ask-permission perm)
+             ['yes-once #t]
+             ['yes-this-run (begin (add-runtime-perm! perm)
+                                   #t)]
+             ['yes-permanent (begin (add-perm-to-app-perms-file! perm)
+                                    (add-runtime-perm! perm)
+                                    #t)]
+             ['no-once #f]
+             ['no-this-run (begin (hash-set! do-not-ask-user-map perm #t)
+                                  #f)]
+             ['no-all-this-run (begin (set! do-not-ask-user #t)
+                                      #f)]
+             ;['no-permanent #f]
+             [else #f]
+             ))]))
 
 (define (has-permission? perm)
   (cond [full-user-permissions? #t]

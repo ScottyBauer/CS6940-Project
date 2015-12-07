@@ -26,7 +26,7 @@
   (mk-button "no this run" 'no-this-run)
   (mk-button "do not ask for any more permissions this run" 'no-all-this-run)
   ;(mk-button "no forever" 'no-permanent)
-  (mk-button "yes once" 'yes-once)
+  ;(mk-button "yes once" 'yes-once)
   (mk-button "yes this run" 'yes-this-run)
   (mk-button "yes forever" 'yes-permanent)
   (send dialog show #t)

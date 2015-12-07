@@ -1,4 +1,4 @@
-#lang s-exp "permission-lang.rkt"
+#lang s-exp "../permission-lang.rkt"
 
 (require racket/port) ; for port->string
 

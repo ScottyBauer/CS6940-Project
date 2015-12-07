@@ -2,9 +2,10 @@
 (require racket/file)
 (require racket/list)
 (require racket/path)
+(require racket/string)
 (require racket/match)
 (require "file-permission-tree.rkt")
-;(require "gui-ask-permission.rkt")
+(require "gui-ask-permission.rkt")
 
 
 (define global-perms '())
@@ -31,6 +32,47 @@
   (reroot-path (path->complete-path (find-system-path 'run-file))
                (normalize-path "~/app-permissions")))
 
+(define perm-constant-table
+  (hash "@APP_DATA" "~/app-data"
+        "@HOME" "~"
+        "@APP_PERMISSIONS" "~/app-permissions"
+        "@PERMISSION_DEFINITIONS" "~/permission-definitions"
+        ))
+
+(define (load-composite-permission-def perm-name)
+  (file->perms (normalize-path (string-append "~/permission-definitions/"
+                                              (symbol->string perm-name)))))
+
+(define (expand-composite-perm-template template args)
+  (define (mk-perm-at-expander args)
+    (lambda (path-part)
+      (cond [(regexp-match #px"^@\\d+$" path-part)
+             (with-handlers ([(λ _ #t) (λ _ path-part)])
+               (list-ref args (sub1 (string->number
+                                     (substring path-part 1)))))]
+            [(regexp-match "^@.*$" path-part)
+             (with-handlers ([(λ _ #t) (λ _ path-part)])
+               (hash-ref perm-constant-table path-part))]
+            [else path-part])))
+
+  (define (expand-composite-part template-part args)
+    ;; TODO - this should accept multiple paths (IE multiple perm arguments)
+    (let* ((type (car template-part))
+           (path (cadr template-part))
+           (path-parts (string-split path "/" #:trim? #f)))
+      (list type (string-join (map (mk-perm-at-expander args) path-parts) "/"))))
+
+  (for/list ((perm template))
+    (expand-composite-part perm args)))
+
+(define (expand-composite-perm p)
+  (let* ((name (car p))
+         (args (cdr p))
+         (template (load-composite-permission-def name))
+         )
+    (expand-composite-perm-template template args)
+    ))
+
 (define (file->perms f)
   (with-handlers ([(λ _ #t) (λ _ '())])
     (let ((perms (file->value (normalize-path f))))
@@ -43,7 +85,8 @@
          (add-to-file-perm-tree! fs-perm-tree (normalize-path (second p)) #f #t #f)]
         [(equal? (car p) 'fs-protect)
          (add-to-file-perm-tree! fs-perm-tree (normalize-path (second p)) #f #f #t)]
-        [else (void)]))
+        [else (for ((sub-p (expand-composite-perm p)))
+                (update-fs-perm-tree-with-perm! sub-p))]))
 
 (define (add-runtime-perm! perm)
   (set! permissions (cons perm permissions))
@@ -76,8 +119,7 @@
   (cond [do-not-ask-user #f]
         [(hash-has-key? do-not-ask-user-map perm) #f]
         [else
-         (let ((gui-ask-permission (dynamic-require "gui-ask-permission.rkt" 'gui-ask-permission)))
-           (match (gui-ask-permission perm)
+         (match (gui-ask-permission perm)
              ['yes-once #t]
              ['yes-this-run (begin (add-runtime-perm! perm)
                                    #t)]
@@ -91,7 +133,7 @@
                                       #f)]
              ;['no-permanent #f]
              [else #f]
-             ))]))
+             )]))
 
 (define (has-permission? perm)
   (cond [full-user-permissions? #t]
@@ -164,5 +206,6 @@
   display-lines-to-file
   )
 
-; permissions
+ permissions
+ ask-user-for-permission!
  )

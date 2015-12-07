@@ -1,4 +1,4 @@
-#lang s-exp "permission-lang.rkt"
+#lang s-exp "../permission-lang.rkt"
 
 (define args (vector->list (current-command-line-arguments)))
 

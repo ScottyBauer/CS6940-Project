@@ -211,6 +211,7 @@
   )
 
  permissions
+ has-permission?
  ask-user-for-permission!
  expand-composite-perm
  )

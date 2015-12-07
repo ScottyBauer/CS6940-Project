@@ -2,6 +2,8 @@
 
 (require racket/gui/base)
 (require racket/class)
+(require racket/port)
+(require "permission-lang.rkt")
 
 (provide gui-ask-permission)
 
@@ -29,5 +31,24 @@
   ;(mk-button "yes once" 'yes-once)
   (mk-button "yes this run" 'yes-this-run)
   (mk-button "yes forever" 'yes-permanent)
+
+  (define expanded-perms (expand-composite-perm perm))
+
+  (define perm-expand-button
+    (new button%
+         [parent dialog]
+         [label "Show expanded permission"]
+         [callback
+          (λ _ (new message%
+                    [parent dialog]
+                    [label (with-output-to-string
+                             (λ _
+                               (let ((old-ep expanded-perms))
+                                 (set! expanded-perms '())
+                                 (for ((p old-ep))
+                                   (printf "~a~n" p)
+                                   (set! expanded-perms (append expanded-perms
+                                                                (expand-composite-perm p)))))
+                               ))]))]))
   (send dialog show #t)
   answer)

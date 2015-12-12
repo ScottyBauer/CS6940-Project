@@ -65,10 +65,10 @@ The dialog will show which permission the application is lacking, and present th
 If the user allows access, the run-time system adds the permission to the run-time permission list and/or to the permanent application-specific permission file.
 If the user denies the permission, or if the application is blocked from asking for permission, then access is blocked and an exception is raised.
 \\
-\indent
+
 Composite permissions are implemented as files in a specific directory with the same name as the permission they give, and containing their pattern and template.  When programs start, these templates are used to expand given composite permissions to primitives.  When an application requests composite permissions from the user, the user can press a button on the dialog to see a one-level expansion of the specific permission.  If the expansion contains composite permissions, the user can expand them as well.  This can be continued until the user sees the permission entirely in terms of primitives.
 \\
-\indent
+
 We created test programs in \textit{permission-lang}, including an implementations of cat, ls, and a toy calendar program.
 These were used to test that permissions were checked and enforced properly, and to test the effectiveness of the user interface.\\
 Our implementation is hosted on Github, and you can view our code here \url{https://github.com/ScottyBauer/CS6940-Project}
@@ -81,10 +81,10 @@ Our implementation is hosted on Github, and you can view our code here \url{http
 \caption{Runtime permission delegation to user}
 \end{figure}
 
-\indent
+
 As a proof of concept, we wrapped common Racket file system functions in our language runtime. That means when a program written in our language invokes a file system function, it goes to our runtime which validates that the calling process has the ability to access that function and the parameters for that function. Lets say an application wants to read some specific file. The runtime will look at the file system path to be read and compare the paths against the permission file. If the user had previously granted access to this file then the runtime invokes the true read function and passes the result back the the process. Assuming that the permission had not been granted, the runtime will return an exception to the process.
 \\
-\indent
+
 To test out or runtime and permission model we built two common unix applications, \textit{cat} and \textit{ls} and ran them using our runtime and permission scheme. We setup a series of directories and files with varying permissions. We attempted to `ls' directories we weren't granted permissions to and verified the runtime stopped us. We also attempted to read files with `cat' we didn't have access to, but did have access to the underlying folder. For all of our tests the permission model and runtime acted as expected. When a user hadn't predefined a set of permissions to use the runtime will pop up a dialog window which allows the user to see what permission is required to access the resource. The user has the ability to grant access or not grant access to the resource. More over, the user can grant access once, grant access for ever, and the same for the inverse, deny once or deny for ever. An example of the popup can be see in Figure 1.
 
 
@@ -112,7 +112,7 @@ Second, a single company is not able to anticipate the needs of all different ty
 Permissions systems need to allow for needed fine grained controls and extensibility, while also being easy for the average user to understand and use.
 We believe extensible systems built on a simple core are the best way to achieve this, and we therefore recommend further research into such permission models.
 \\
-\indent
+
 An important improvement our model needs is a set of primitives for networking.  We believe that networking, as well as ony other type of permissions will also benefit from a simple, understandable set of primitives and a means of composition and abstraction.  We believe appropriate network primitives may include permissions such as \textit{(network "domain.example.com")}.
 
 Another concern we have not solved is about additional supporting infrastructure.  For instance, we believe that packaging and installation-time rules and interfaces for adding compound permission definitions would help prevent confusion, accidental or intentional.

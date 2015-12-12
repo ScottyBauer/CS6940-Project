@@ -36,6 +36,23 @@ Malware Distributors also provide software that appears to have a legitimate pur
 These code written by these adversaries is knowingly run by users, although they do not know what the software does.  Adversaries generally have access to file system and network resources on the user's device, and are only limited by access and permission systems used by the operating system or runtime environment.
 
 \section{Methodology}\label{section:methodology}
+We have created a model that includes primitive permissions that take arguments, a means of combination for these primitives, and a novel method for protecting sensitive resources.
+Since all user data is stored on the file system, and devices and other resources on Unix are accessed as files, security of the file system is the core of our model.
+We use s-expression notation to write down our permissions, and the most basic permission in our system is \textit{(fs-read "/file/system/path")}.  
+The \textit{fs-read} permission allows an application to read the file or directory at the path given in its argument, as well recursively to any subdirectories and their contained files.
+The \textit{fs-write} permission similarly grants write permission.
+It is often convenient and desirable for users to give read or write permissions to applications at the root of a large sub-tree, such as a user's home directory.  
+However, there are often some sub-directories in that tree that are more sensitive, such as directories containing passwords, private keys, or sensitive data.
+To allow the convenience of recursive access to large parts of the file system tree while still providing protection to sensitive sub-trees, we provide the \textit{fs-protect} pseudo-permission.
+\textit{fs-protect} puts a protective barrier on its given path, blocking access to all sub-trees of that path without an \textit{fs-read} or \textit{fs-write} permission with an argument explicitly allowing that sub-tree.
+
+For example, if a user has \textit{(fs-protext "~/.ssh")} in his global permission configuration, and \textit{(fs-read "~")} in his configuration for the \textit{foo} application, \textit{foo} can access \textit{~/Documents/paper.odf} or \textit{~/text-messages/personal-conversation-history.dat}, but not \textit{~/.ssh/id\_rsa} or \textit{~/.ssh/known\_hosts}.  
+If the \textit{bar} application has \textit{(fs-read "~/.ssh/known\_hosts")}, it can access \textit{~/.ssh/known\_hosts} (and any subdirectories of it if it were a directory), but not \textit{~/.ssh/id\_rsa}.
+This allows for both convenient broad access permissions as well as very fine-grained access.
+
+In addition to primitive permissions, composite permissions can be created as functions from higher-level permissions to primitives or other composite permissions.  This allows for abstraction to form high-level permissions such as those seen in Android.  For instance, if calendar files are stored in \textit{~/app-data/calendar/}, then permissions to a user's work calendar may be given by adding a \textit{(calendar "work")} permission that expands into \textit{(fs-read "~/app-data/calendar/work/")} and \textit{(fs-write "~/app-data/calendar/work/")}.  This makes it easy to add many high level permissions, while also providing an easy way for users to see the expansion of such permissions to know what they really do.  New composite permissions must be defined as simple pattern-matching replacements, so that both their abstract and specific expansions can be displayed to users easily.
+
+
 
 \section{Implementation}\label{section:implementation}
 

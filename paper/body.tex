@@ -3,6 +3,15 @@ Many permission models today are broken for the type of applications being used 
 
 \section{Related Work}\label{section:relatedwork}
 
+\section{Adversary Model}\label{section:adversary-model}
+Our adversary model is based around the creators of the software that you install on your device and what information can be gathered/changed without your knowledge. We classified our adversary's into two main categories, Legitimate Advertising Businesses and Malware Distributors.
+
+Legitimate Businesses typically provide the software free of charge but gather personal information available on your device to be used for advertising purposes.  While they are legal entities they are often viewed as malicious, or at least overstepping their bounds on data collection, and tend to scoop up much more personal information than people realize or want to allow. Typical examples of these entities are Google and Facebook.  
+
+Malware Distributors also provide software that appears to have a legitimate purpose. The legitimate purpose is used to mask the true malicious nature of the software. The goal of these adversaries is typically unlawful activities that can cause the user harm. This can be destruction of data, ransomware, identity theft and botnet creation. Typical examples of these type of adversaries are Crypto-Locker, Spam Distributors and people on Darkode.
+
+These code written by these adversaries is knowingly run by users, although they do not know what the software does.  Adversaries generally have access to file system and network resources on the user's device, and are only limited by access and permission systems used by the operating system or runtime environment.
+
 \subsection{Permission-Model}\label{section:Permssion-model}
 
 \subsection{Racket-hash-lang}\label{section:racket}

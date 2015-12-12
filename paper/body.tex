@@ -38,7 +38,7 @@ These code written by these adversaries is knowingly run by users, although they
 We have created a model that includes primitive permissions that take arguments, a means of combination for these primitives, and a novel method for protecting sensitive resources.
 Since all user data is stored on the file system, and devices and other resources on Unix are accessed as files, security of the file system is the core of our model.
 We use s-expression notation to write down our permissions, and the most basic permission in our system is \textit{(fs-read "/file/system/path")}.  
-The \textit{fs-read} permission allows an application to read the file or directory at the path given in its argument, as well recursively to any subdirectories and their contained files.
+The \textit{fs-read} permission allows an application to read the file or directory at the path given in its argument, as well recursively to any sub directories and their contained files.
 The \textit{fs-write} permission similarly grants write permission.
 It is often convenient and desirable for users to give read or write permissions to applications at the root of a large sub-tree, such as a user's home directory.  
 However, there are often some sub-directories in that tree that are more sensitive, such as directories containing passwords, private keys, or sensitive data.
@@ -46,7 +46,7 @@ To allow the convenience of recursive access to large parts of the file system t
 \textit{fs-protect} puts a protective barrier on its given path, blocking access to all sub-trees of that path without an \textit{fs-read} or \textit{fs-write} permission with an argument explicitly allowing that sub-tree.
 
 For example, if a user has \textit{(fs-protext "~/.ssh")} in his global permission configuration, and \textit{(fs-read "~")} in his configuration for the \textit{foo} application, \textit{foo} can access \textit{~/Documents/paper.odf} or \textit{~/text-messages/personal-conversation-history.dat}, but not \textit{~/.ssh/id\_rsa} or \textit{~/.ssh/known\_hosts}.  
-If the \textit{bar} application has \textit{(fs-read "~/.ssh/known\_hosts")}, it can access \textit{~/.ssh/known\_hosts} (and any subdirectories of it if it were a directory), but not \textit{~/.ssh/id\_rsa}.
+If the \textit{bar} application has \textit{(fs-read "~/.ssh/known\_hosts")}, it can access \textit{~/.ssh/known\_hosts} (and any sub directories of it if it were a directory), but not \textit{~/.ssh/id\_rsa}.
 This allows for both convenient broad access permissions as well as very fine-grained access.
 
 In addition to primitive permissions, composite permissions can be created as functions from higher-level permissions to primitives or other composite permissions.  This allows for abstraction to form high-level permissions such as those seen in Android.  For instance, if calendar files are stored in \textit{~/app-data/calendar/}, then permissions to a user's work calendar may be given by adding a \textit{(calendar "work")} permission that expands into \textit{(fs-read "~/app-data/calendar/work/")} and \textit{(fs-write "~/app-data/calendar/work/")}.  This makes it easy to add many high level permissions, while also providing an easy way for users to see the expansion of such permissions to know what they really do.  New composite permissions must be defined as simple pattern-matching replacements, so that both their abstract and specific expansions can be displayed to users easily.
@@ -56,7 +56,7 @@ To this end we have designed our permissions to be writable as s-expressions, wh
 Our model allows for applications to ask for privileges at run-time, and additionally for them to be disallowed to by configuration.  This also gives the flexibility for our model to be used by different user bases with different requirements.
 
 \section{Implementation}\label{section:implementation}
-We created a proof-of-concept implementation of our framework as a language and runtime system built using Racket's \#lang \(pronounced hash lang) feature\cite{felleisen2015racket}. Programs written in \textit{permission-lang}, as we call it, have their permissions loaded by the run-time system for checking.
+We created a proof-of-concept implementation of our framework as a language and runtime system built using Racket's hash lang feature \cite{rakt}. Programs written in \textit{permission-lang}, as we call it, have their permissions loaded by the run-time system for checking.
 A global permission file is consulted for all applications, as well as an app-specific file.  
 When an application uses a file access function, such as \textit{open-input-file} or \textit{write-to-file}, the loaded permissions are checked.  
 If permission has been granted, the program continues as normal.  
@@ -70,24 +70,29 @@ Composite permissions are implemented as files in a specific directory with the 
 \\
 \indent
 We created test programs in \textit{permission-lang}, including an implementations of cat, ls, and a toy calendar program.
-These were used to test that permissions were checked and enforced properly, and to test the effectiveness of the user interface.
-\\
-Our implementation is hosted on Github, and you can view our code here: https://github.com/ScottyBauer/CS6940-Project
+These were used to test that permissions were checked and enforced properly, and to test the effectiveness of the user interface.\\
+Our implementation is hosted on Github, and you can view our code here \url{https://github.com/ScottyBauer/CS6940-Project}
 
 
 \section{Results}\label{section:ResImp}
+\begin{figure}
+\centering
+\includegraphics[height=1.5in, width=4in]{ask-permission.png}
+\caption{Runtime permission delegation to user}
+\end{figure}
+
 \indent
-As a proof of concept, we wrapped common Racket filesystem functions in our language runtime. That means when a program written in our language invokes a filesystem function, it goes to our runtime which validates that the calling process has the ability to access that function and the parameters for that function. Lets say an application wants to read some specific file. The runtime will look at the file system path to be read and compare the paths against the permission file. If the user had previously granted access to this file then the runtime invokes the true read function and passes the result back the the process. Assuming that the permission had not been granted, the runtime will return an exception to the process.
+As a proof of concept, we wrapped common Racket file system functions in our language runtime. That means when a program written in our language invokes a file system function, it goes to our runtime which validates that the calling process has the ability to access that function and the parameters for that function. Lets say an application wants to read some specific file. The runtime will look at the file system path to be read and compare the paths against the permission file. If the user had previously granted access to this file then the runtime invokes the true read function and passes the result back the the process. Assuming that the permission had not been granted, the runtime will return an exception to the process.
 \\
 \indent
-To test out or runtime and permission model we built two common unix applications, \textit{cat} and \textit{ls} and ran them using our runtime and permission scheme. We setup a series of directories and files with varying permissions. We attempted to `ls' directores we weren't granted permissions to and verified the runtime stopped us. We also attempted to read files with `cat' we didn't have access to, but did have access to the underlying folder. For all of our tests the permission model and runtime acted as expected. When a user hadn't predefined a set of permissions to use the runtime will pop up a dialog window which allows the user to see what permission is required to access the resource. The user has the ability to grant access or not grant access to the resource. More over, the user can grant access once, grant access for ever, and the same for the inverse, deny once or deny for ever. An example of the popup can be see in Figure \ref{fig:popup}
+To test out or runtime and permission model we built two common unix applications, \textit{cat} and \textit{ls} and ran them using our runtime and permission scheme. We setup a series of directories and files with varying permissions. We attempted to `ls' directories we weren't granted permissions to and verified the runtime stopped us. We also attempted to read files with `cat' we didn't have access to, but did have access to the underlying folder. For all of our tests the permission model and runtime acted as expected. When a user hadn't predefined a set of permissions to use the runtime will pop up a dialog window which allows the user to see what permission is required to access the resource. The user has the ability to grant access or not grant access to the resource. More over, the user can grant access once, grant access for ever, and the same for the inverse, deny once or deny for ever. An example of the popup can be see in Figure 1.
 
 
 \section{Future Work}\label{section:futurework}
 
-\begin{figure}
+\begin{figure}[h]
 \centering
-\includegraphics[height=2.5in, width=3in]{app.png}
+\includegraphics[height=2in, width=2.5in]{app.png}
 \caption{Android 6.0 runtime permission check}
 \end{figure}
 
@@ -96,7 +101,7 @@ For permission models to be successful they need to be built on a simple set of 
 They also need to be adaptable to the needs of different users, with both different abilities and different security needs.
 Without these attributes, permission systems will be ineffective and inflexible, not providing needed security to most users.
 \\
-Runtime checking of permissions, as well as the ability to add or revoke permissions at runtime will are an extremely important feature that we built. We argue that this ability to modify permissions at runtime is one of the most important features for a permission system. For example, if a user is near their data cap on their phone, they may wish to revoke permission to use the internet from applications. We believe that the benefits of this feature of a permission model out weighs the burden put on developers who are then required to gracefully handle not having specific permissions at runtime. Android 6.0 has taken this approach, you can now, as a user, revoke certain permissions at runtime. See Figure \ref{fig:androidperm} for an example.\\
+Runtime checking of permissions, as well as the ability to add or revoke permissions at runtime will are an extremely important feature that we built. We argue that this ability to modify permissions at runtime is one of the most important features for a permission system. For example, if a user is near their data cap on their phone, they may wish to revoke permission to use the internet from applications. We believe that the benefits of this feature of a permission model out weighs the burden put on developers who are then required to gracefully handle not having specific permissions at runtime. Android 6.0 has taken this approach\cite{android}, you can now, as a user, revoke certain permissions at runtime. See Figure 2 for an example.\\
 
 We also believe that permission models need to be extensible.
 Legacy permission systems such as Android's don't let the user or third parties make new permissions. 

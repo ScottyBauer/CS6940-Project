@@ -1,5 +1,13 @@
 \begin{abstract}
-Operating systems today have numerous permission models which all aim to keep user level applications from accessing resources they shouldn't be able to. Android has a custom model built on-top of unix privledges. Unix has a basic uid/gid-based security model, to restrict applications. These basic implementations lack the necessary components to restrict applications in a meaningful manner. To address theses shortcomings operating system developers have built and included mandatory access control mechanisms. SELinux is used both on Android and Linux to constrain applications from accessing or using Kernel nodes, directories, files or sockets. The BSD operating systems have two mechanisms for manditory access control. FreeBSD has Capsicum, a capability based system which essentially sandboxes applicaitons. OpenBSD has a new mechanism \textit{tame()} which is a subsystem  to restrict programs into a "reduced feature operating model". All these mechanisms have one thing in common, they're baked into the operating system and not interchangeable. We propose limiting access at the language and language runtime level, instead at the operating system level. We have implemented a proof-of-concept custom language using Racket macros, and evaulated the language on a comodoty Linux and FreeBSD machine.
+Operating systems today have numerous permission models which all aim to keep user level applications from accessing resources they shouldn't be able to. 
+Unix has a basic user and group based security model to restrict applications run by different users, but does not protect a user from his own applications.
+To improve security against buggy or untrusted code, various systems have been devised to replace or augment Unix permissions.
+Various mandatory access systems have been created to give more fine grained permissions to specific applications, including SELinux, Tomoyo Linux, and AppArmor on Linux, Capsicum on FreeBSD, and the \textit{tame()} mechanism on OpenBSD.
+All of these systems have a complicated model, complicated configuration modifiable only by the root user, and suitable for use only by experienced system administrators rather than average users.
+Android has a custom model built using Unix privledges that replaces the Unix model and limits all applications. 
+However, it suffers from many problems including lack of extensibility, all-or-nothing permissions, overly-broad permissions, ineffective user interface, etc.
+We propose a new model based on simple primitive permissions that allows extensibility, abstraction, run-time permission management, and configuration mechanisms that are both useful for system administrators and usable by normal users.
+We have implemented a proof-of-concept custom language using Racket macros, and evaulated the language on a comodity Linux and FreeBSD machine.
 
 \end{abstract}
 

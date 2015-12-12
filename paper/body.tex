@@ -7,10 +7,10 @@ Related work includes the Unix permission model, mandatory access control system
 Unix permissions provide a simple and useful model for protecting against other users on a system, but they do not protect a user against malicious applications.
 
 Mandatory access systems give greater protections, and are generally extensions of the Unix model that work with it.  These include SELinux, AppArmor, Tomoyo Linux, Capsicum, and Tame.
-SELinux is used both on Android and Linux to constrain applications from accessing or using Kernel nodes, directories, files or sockets. 
+SELinux\cite{selinux} is used both on Android and Linux to constrain applications from accessing or using Kernel nodes, directories, files or sockets. 
 AppArmor and Tomoyo are additional optional systems for Linux which restrict applications based on configurable application contexts.
-FreeBSD has Capsicum, a capability based system which essentially sandboxes applications. 
-OpenBSD has a new mechanism \textit{tame()} which is a subsystem  to restrict programs into a "reduced feature operating model".
+FreeBSD has Capsicum\cite{capsicum}, a capability based system which essentially sandboxes applications. 
+OpenBSD has a new mechanism \textit{tame()}\cite{tame} which is a subsystem  to restrict programs into a "reduced feature operating model".
 All of these mandatory access systems have complex models that are difficult for users to understand.  
 They must be configured with complicated text files that can be edited only by root.  
 This makes it impossible for normal users to control them, or for non-root users to set their personal security policy.
@@ -31,7 +31,7 @@ Our adversary model is based around the creators of the software that you instal
 
 Legitimate Businesses typically provide the software free of charge but gather personal information available on your device to be used for advertising purposes.  While they are legal entities they are often viewed as malicious, or at least overstepping their bounds on data collection, and tend to scoop up much more personal information than people realize or want to allow. Typical examples of these entities are Google and Facebook.  
 
-Malware Distributors also provide software that appears to have a legitimate purpose. The legitimate purpose is used to mask the true malicious nature of the software. The goal of these adversaries is typically unlawful activities that can cause the user harm. This can be destruction of data, ransomware, identity theft and botnet creation. Typical examples of these type of adversaries are Crypto-Locker, Spam Distributors and people on Darkode.
+Malware Distributors also provide software that appears to have a legitimate purpose. The legitimate purpose is used to mask the true malicious nature of the software. The goal of these adversaries is typically unlawful activities that can cause the user harm. This can be destruction of data, ransomware, identity theft and botnet creation. Typical examples of these type of adversaries are Crypto-Locker\cite{cryptolocker}, Spam Distributors, and people on Darkode\cite{darkode}.
 
 These code written by these adversaries is knowingly run by users, although they do not know what the software does.  Adversaries generally have access to file system and network resources on the user's device, and are only limited by access and permission systems used by the operating system or runtime environment.
 

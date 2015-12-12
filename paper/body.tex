@@ -2,11 +2,29 @@
 Many permission models today are broken for the type of applications being used today. We've gone from systems that run only trusted programs to PCs, mobile devices, and other systems where users want to run untrusted or semi-trusted code. The permission models have not kept pace with the change in computing landscape. Existing permission models either protect only from other users, ignoring the threat of untrusted code, provide shallow and overly broad protections, or use unwieldy and complicated configuration mechanics. We present a new permission model based on the idea that you have data to protect, and you want to protect it against snooping applications. We design and implement our language inside of Racket\cite{racket}. We evaluate our base implementation by building up two common command line programs, ls and cat. Using these programs we evaluate our permission model to prevent access to certain resources.
 
 \section{Related Work}\label{section:relatedwork}
-%SELinux is used both on Android and Linux to constrain applications from accessing or using Kernel nodes, directories, files or sockets. 
-%The BSD operating systems have two mechanisms for mandatory access control. 
-%FreeBSD has Capsicum, a capability based system which essentially sandboxes applicaitons. 
-%OpenBSD has a new mechanism \textit{tame()} which is a subsystem  to restrict programs into a "reduced feature operating model".
-%All these mechanisms have one thing in common, they're baked into the operating system and not interchangeable. We propose limiting access at the language and language runtime level, instead at the operating system level. 
+Related work includes the Unix permission model, mandatory access control systems, and the Android permission model.
+
+Unix permissions provide a simple and useful model for protecting against other users on a system, but they do not protect a user against malicious applications.
+
+Mandatory access systems give greater protections, and are generally extensions of the Unix model that work with it.  These include SELinux, AppArmor, Tomoyo Linux, Capsicum, and Tame.
+SELinux is used both on Android and Linux to constrain applications from accessing or using Kernel nodes, directories, files or sockets. 
+AppArmor and Tomoyo are additional optional systems for Linux which restrict applications based on configurable application contexts.
+FreeBSD has Capsicum, a capability based system which essentially sandboxes applications. 
+OpenBSD has a new mechanism \textit{tame()} which is a subsystem  to restrict programs into a "reduced feature operating model".
+All of these mandatory access systems have complex models that are difficult for users to understand.  
+They must be configured with complicated text files that can be edited only by root.  
+This makes it impossible for normal users to control them, or for non-root users to set their personal security policy.
+
+Android re-purposes the classic Unix permission model by treating each application as a different user, and has a variety of different high-level permissions that applications can request.
+The Android security model is the most commonly used model on consumer devices, and some consider it to be the state of the art.
+However, the Android permission model has many flaws.
+Permissions must be granted at install-time, which most users don't pay attention to.
+Many permissions are overly broad, such as full sd-card access.
+Many permissions have confusing names and descriptions, and it is difficult to find out what they really do.
+All permissions must be granted, so users can not allow partial access to applications to get the functionality they desire while blocking functionality they want to disallow.
+Finally, all permissions are designed by Google, whom many view as an adversary, with no possibility for extension by other parties that the user trusts.
+Android version 6 was released while we were working on this project, which allows run-time permission configuration, fixing some of the issues, but the others still exist.
+
 
 \section{Adversary Model}\label{section:adversary-model}
 Our adversary model is based around the creators of the software that you install on your device and what information can be gathered/changed without your knowledge. We classified our adversary's into two main categories, Legitimate Advertising Businesses and Malware Distributors.

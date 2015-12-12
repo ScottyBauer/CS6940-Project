@@ -3,15 +3,20 @@ Many permission models today are broken for the type of applications being used 
 
 \section{Related Work}\label{section:relatedwork}
 
-
 \subsection{Permission-Model}\label{section:Permssion-model}
 
 \subsection{Racket-hash-lang}\label{section:racket}
 
 \section{Architecture}\label{section:arch}
 
-\section{Results}
+\section{Results}\label{section:results}
 
-\section{Future Work}
+\section{Future Work}\label{section:futurework}
+We believe that our work is a step in the right direction and a good iteration on top of some of the previous permission models being shipped today. For permission models to be successful they need to continue to develop and allow users the ability to make generic permissions on top of fine grained permissions. Without the ability to combine and create higher level permissions, the permission model could soon become obsolete by an evolving computing landscape.\\
+\indent
+Runtime checking of permissions, as well as the ability to add or revoke permissions at runtime will are an extremely important feature that we built. We argue that this ability to modify permissions at runtime is one of the most important features for a permission system. For example, if a user is near their data cap on their phone, they may wish to revoke permission to use the internet from applications. We believe that the benefits of this feature of a permission model out weighs the burden put on developers who are then required to gracefully handle not having specific permissions at runtime. Android 6.0 has taken this approach, you can now, as a user, revoke certain permissiosn at runtime, see Figure 1 for an example.\\
+\indent
+Lastly, permission models need to let users add their own permissions. While android gives you the ability to revoke permissions at runtime, it doesn't let the user make their own permissions. Google creates the permissions and sets what those permissions can and cannot do. This isn't in the users best interest for two reasons: Google is an advertising company so they want access to some data. Second, different people have different levels of privacy they want to keep on their phones. An example of defining custom permissions could be an app wants access to some text messages for a legitimate reason. A user could generate a permission that says, this app has access to the text messages from John from the past 3 hours.\\
+
 
 

@@ -52,9 +52,13 @@ This allows for both convenient broad access permissions as well as very fine-gr
 
 In addition to primitive permissions, composite permissions can be created as functions from higher-level permissions to primitives or other composite permissions.  This allows for abstraction to form high-level permissions such as those seen in Android.  For instance, if calendar files are stored in \textit{~/app-data/calendar/}, then permissions to a user's work calendar may be given by adding a \textit{(calendar "work")} permission that expands into \textit{(fs-read "~/app-data/calendar/work/")} and \textit{(fs-write "~/app-data/calendar/work/")}.  This makes it easy to add many high level permissions, while also providing an easy way for users to see the expansion of such permissions to know what they really do.  New composite permissions must be defined as simple pattern-matching replacements, so that both their abstract and specific expansions can be displayed to users easily.
 
+To be useful to both normal and sophisticated users, configuration must be simultaneously easy and powerful, and allow for both graphical editing for normal users and text configuration that can be version controlled for administrators.  
+To this end we have designed our permissions to be writable as s-expressions, which are easy for programs to read and write, and eminently human-readable and editable.
+Our model allows for applications to ask for privileges at run-time, and additionally for them to be disallowed to by configuration.  This also gives the flexibility for our model to be used by different user bases with different requirements.
 
 
 \section{Implementation}\label{section:implementation}
+We created a proof-of-concept implementation of our framework as a language and runtime system built on top of Racket\cite{racket}.
 
 \section{Conclusion}\label{section:conclusion}
 

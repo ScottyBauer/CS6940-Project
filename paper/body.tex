@@ -7,7 +7,7 @@ Related work includes the Unix permission model, mandatory access control system
 Unix permissions provide a simple and useful model for protecting against other users on a system, but they do not protect a user against malicious applications.
 
 Mandatory access systems give greater protections, and are generally extensions of the Unix model that work with it.  These include SELinux, AppArmor, Tomoyo Linux, Capsicum, and Tame.
-SELinux\cite{selinux} is used both on Android and Linux to constrain applications from accessing or using Kernel nodes, directories, files or sockets. 
+SELinux\cite{selinux} is used both on Android and Linux to constrain applications from accessing or using Kernel nodes, directories, files or sockets.
 AppArmor and Tomoyo are additional optional systems for Linux which restrict applications based on configurable application contexts.
 FreeBSD has Capsicum\cite{capsicum}, a capability based system which essentially sandboxes applications. 
 OpenBSD has a new mechanism \textit{tame()}\cite{tame} which is a subsystem  to restrict programs into a "reduced feature operating model".
@@ -52,22 +52,35 @@ This allows for both convenient broad access permissions as well as very fine-gr
 
 In addition to primitive permissions, composite permissions can be created as functions from higher-level permissions to primitives or other composite permissions.  This allows for abstraction to form high-level permissions such as those seen in Android.  For instance, if calendar files are stored in \textit{~/app-data/calendar/}, then permissions to a user's work calendar may be given by adding a \textit{(calendar "work")} permission that expands into \textit{(fs-read "~/app-data/calendar/work/")} and \textit{(fs-write "~/app-data/calendar/work/")}.  This makes it easy to add many high level permissions, while also providing an easy way for users to see the expansion of such permissions to know what they really do.  New composite permissions must be defined as simple pattern-matching replacements, so that both their abstract and specific expansions can be displayed to users easily.
 
-To be useful to both normal and sophisticated users, configuration must be simultaneously easy and powerful, and allow for both graphical editing for normal users and text configuration that can be version controlled for administrators.  
+To be useful to both normal and sophisticated users, configuration must be simultaneously easy and powerful, and allow for both graphical editing for normal users and text configuration that can be version controlled for administrators.
 To this end we have designed our permissions to be writable as s-expressions, which are easy for programs to read and write, and eminently human-readable and editable.
 Our model allows for applications to ask for privileges at run-time, and additionally for them to be disallowed to by configuration.  This also gives the flexibility for our model to be used by different user bases with different requirements.
 
-
-\section{Implementation}\label{section:implementation}
-We created a proof-of-concept implementation of our framework as a language and runtime system built on top of Racket\cite{racket}.
-
-\section{Conclusion}\label{section:conclusion}
+\section{Implementation and Results}\label{section:ResImp}
+We built our language using Racket's \#lang \(pronounced hash lang) feature\cite{felleisen2015racket}. We decided our language would be s-expression based, because Racket provides an easy mechanism for dealing with s-expressions. The language we built is small derivative of Racket, because we didn't need to define any new syntatic features. Programmers would program in Racket as usual, with only one modification, they would have to handle custom exceptions thrown by our permission runtime.
+\\
+\indent
+As a proof of concept, we wrapped common Racket filesystem functions in our language runtime. That means when a program written in our language invokes a filesystem function, it goes to our runtime which validates that the calling process has the ability to access that function and the parameters for that function. Lets say an application wants to read some specific file. The runtime will look at the file system path to be read and compare the paths against the permission file. If the user had previously granted access to this file then the runtime invokes the true read function and passes the result back the the process. Assuming that the permission had not been granted, the runtime will return an exception to the process.
+\\
+\indent
+To test out or runtime and permission model we built two common unix applications, \textit{cat} and \textit{ls} and ran them using our runtime and permission scheme. We setup a series of directories and files with varying permissions. We attempted to `ls' directores we weren't granted permissions to and verified the runtime stopped us. We also attempted to read files with `cat' we didn't have access to, but did have access to the underlying folder. For all of our tests the permission model and runtime acted as expected. When a user hadn't predefined a set of permissions to use the runtime will pop up a dialog window which allows the user to see what permission is required to access the resource. The user has the ability to grant access or not grant access to the resource. More over, the user can grant access once, grant access for ever, and the same for the inverse, deny once or deny for ever. An example of the popup can be see in Figure \ref{fig:popup}
 
 \section{Future Work}\label{section:futurework}
+
+\begin{figure}
+\centering
+\includegraphics[height=2.5in, width=3in]{app.png}
+\caption{Android 6.0 runtime permission check}
+\end{figure}
+
 We believe that our work is a step in the right direction and a good iteration on top of some of the previous permission models being shipped today. For permission models to be successful they need to continue to develop and allow users the ability to make generic permissions on top of fine grained permissions. Without the ability to combine and create higher level permissions, the permission model could soon become obsolete by an evolving computing landscape.\\
 \indent
-Runtime checking of permissions, as well as the ability to add or revoke permissions at runtime will are an extremely important feature that we built. We argue that this ability to modify permissions at runtime is one of the most important features for a permission system. For example, if a user is near their data cap on their phone, they may wish to revoke permission to use the internet from applications. We believe that the benefits of this feature of a permission model out weighs the burden put on developers who are then required to gracefully handle not having specific permissions at runtime. Android 6.0 has taken this approach, you can now, as a user, revoke certain permissiosn at runtime, see Figure 1 for an example.\\
+Runtime checking of permissions, as well as the ability to add or revoke permissions at runtime will are an extremely important feature that we built. We argue that this ability to modify permissions at runtime is one of the most important features for a permission system. For example, if a user is near their data cap on their phone, they may wish to revoke permission to use the internet from applications. We believe that the benefits of this feature of a permission model out weighs the burden put on developers who are then required to gracefully handle not having specific permissions at runtime. Android 6.0 has taken this approach, you can now, as a user, revoke certain permissiosn at runtime, see Figure \ref{fig:androidperm} for an example.\\
 \indent
 Lastly, permission models need to let users add their own permissions. While android gives you the ability to revoke permissions at runtime, it doesn't let the user make their own permissions. Google creates the permissions and sets what those permissions can and cannot do. This isn't in the users best interest for two reasons: Google is an advertising company so they want access to some data. Second, different people have different levels of privacy they want to keep on their phones. An example of defining custom permissions could be an app wants access to some text messages for a legitimate reason. A user could generate a permission that says, this app has access to the text messages from John from the past 3 hours.\\
+
+\section{Conclusion}\label{section:conclusion}
+We designed, implemented and tested a new permission model designed for the computing landscape of today and tomorrow. Our permission model is extensible, and easy to build upon. The permission runtime gives users the ability to view the permissions about to be used with context from the running program. More over, the user has the ability to reject the permission if they beleive it is out of the programs scope. We tested our implementation on the programs \textit{cat} and \textit{ls}. Our experiments showed that our permission model and runtime met the goals we wanted to defend against int he adversarial model. 
 
 
 

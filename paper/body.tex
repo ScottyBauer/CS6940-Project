@@ -58,16 +58,53 @@ Our model allows for applications to ask for privileges at run-time, and additio
 
 
 \section{Implementation}\label{section:implementation}
-We created a proof-of-concept implementation of our framework as a language and runtime system built on top of Racket\cite{racket}.
+We created a proof-of-concept implementation of our framework as a language and runtime system built on top of Racket\cite{racket}.  Programs written in \textit{permission-lang}, as we call it, have their permissions loaded by the run-time system for checking.  
+A global permission file is consulted for all applications, as well as an app-specific file.  
+When an application uses a file access function, such as \textit{open-input-file} or \textit{write-to-file}, the loaded permissions are checked.  
+If permission has been granted, the program continues as normal.  
+If permission has not been granted, a dialog box will appear.  
+The dialog will show which permission the application is lacking, and present the user with options to allow or deny the permission for the extent of the program run, to permanently allow the permission, or to stop the application from asking for any more permissions.
+If the user allows access, the run-time system adds the permission to the run-time permission list and/or to the permanent application-specific permission file.
+If the user denies the permission, or if the application is blocked from asking for permission, then access is blocked and an exception is raised.
+
+Composite permissions are implemented as files in a specific directory with the same name as the permission they give, and containing their pattern and template.  When programs start, these templates are used to expand given composite permissions to primitives.  When an application requests composite permissions from the user, the user can press a button on the dialog to see a one-level expansion of the specific permission.  If the expansion contains composite permissions, the user can expand them as well.  This can be continued until the user sees the permission entirely in terms of primitives.
+
+We created test programs in \textit{permission-lang}, including an implementations of cat, ls, and a toy calendar program.
+These were used to test that permissions were checked and enforced properly, and to test the effectiveness of the user interface.
+
+Our implementation is hosted on Github, and you can view our code here: https://github.com/ScottyBauer/CS6940-Project
 
 \section{Conclusion}\label{section:conclusion}
+\textit{permission-lang} is effective at enforcing permissions while allowing easy configuration.  We found the model of permissions with arguments to be effective at providing granularity, and \textit{fs-protect} allowed an effective way to allow convenient access to large file system sub-trees while still giving required protections.
+We believe that composition based on primitive permissions is the most effective way to build a complex permission system, but we believe that confusions could arise from similarly-named permissions or from adversaries spoofing legitimate permission definitions.  This is mitigated by the ability for users to see the expansion of composite permissions, but we believe extra support around the packaging and installation of composite permission definitions should be added.
+
+Our implementation is limited by being in a single language implementation, and it can therefore be defeated by simply writing programs in another language.  So while our implementation serves as a useful proof of concept, to be effective it would need to be implemented at an operating system level.  Alternatively, systems could allow only programs written in \textit{permission-lang}, but such action would be severely limiting and frustrating, similar to other systems which have only allowed one programming language, and we discourage such action.  
+
+Additionally, more primitive permissions are needed.  For instance, network permissions are essential, but missing from our prototype.
 
 \section{Future Work}\label{section:futurework}
-We believe that our work is a step in the right direction and a good iteration on top of some of the previous permission models being shipped today. For permission models to be successful they need to continue to develop and allow users the ability to make generic permissions on top of fine grained permissions. Without the ability to combine and create higher level permissions, the permission model could soon become obsolete by an evolving computing landscape.\\
-\indent
-Runtime checking of permissions, as well as the ability to add or revoke permissions at runtime will are an extremely important feature that we built. We argue that this ability to modify permissions at runtime is one of the most important features for a permission system. For example, if a user is near their data cap on their phone, they may wish to revoke permission to use the internet from applications. We believe that the benefits of this feature of a permission model out weighs the burden put on developers who are then required to gracefully handle not having specific permissions at runtime. Android 6.0 has taken this approach, you can now, as a user, revoke certain permissiosn at runtime, see Figure 1 for an example.\\
-\indent
-Lastly, permission models need to let users add their own permissions. While android gives you the ability to revoke permissions at runtime, it doesn't let the user make their own permissions. Google creates the permissions and sets what those permissions can and cannot do. This isn't in the users best interest for two reasons: Google is an advertising company so they want access to some data. Second, different people have different levels of privacy they want to keep on their phones. An example of defining custom permissions could be an app wants access to some text messages for a legitimate reason. A user could generate a permission that says, this app has access to the text messages from John from the past 3 hours.\\
+We believe that our work is a step in the right direction and a good iteration on top of some of the previous permission models being shipped today. 
+For permission models to be successful they need to be built on a simple set of understandable primitives, and allow useful abstraction on top of them.
+They also need to be adaptable to the needs of different users, with both different abilities and different security needs.
+Without these attributes, permission systems will be ineffective and inflexible, not providing needed security to most users.
+
+Runtime checking of permissions, as well as the ability to add or revoke permissions at runtime will are an extremely important feature that we built. We argue that this ability to modify permissions at runtime is one of the most important features for a permission system. For example, if a user is near their data cap on their phone, they may wish to revoke permission to use the internet from applications. We believe that the benefits of this feature of a permission model out weighs the burden put on developers who are then required to gracefully handle not having specific permissions at runtime. Android 6.0 has taken this approach, you can now, as a user, revoke certain permissiosn at runtime.
+
+We also believe that permission models need to be extensible.
+Legacy permission systems such as Android's don't let the user or third parties make new permissions. 
+Google creates the permissions and sets what those permissions can and cannot do. 
+This isn't in the user's best interest for two reasons. 
+First, Google is an advertising company, creating a conflict of interest since they are also viewed as an adversary, and they want to maximize data collection.  
+Second, a single company is not able to anticipate the needs of all different types of users.  While the broad permission types defined for Android may work well for many users, others require more fine grained controls.
+Permissions systems need to allow for needed fine grained controls and extensibility, while also being easy for the average user to understand and use.
+We believe extensible systems built on a simple core are the best way to achieve this, and we therefore recommend further research into such permission models.
+
+An important improvement our model needs is a set of primitives for networking.  We believe that networking, as well as ony other type of permissions will also benefit from a simple, understandable set of primitives and a means of composition and abstraction.  We believe appropriate network primitives may include permissions such as \textit{(network "domain.example.com")}.
+
+Another concern we have not solved is about additional supporting infrastructure.  For instance, we believe that packaging and installation-time rules and interfaces for adding compound permission definitions would help prevent confusion, accidental or intentional.
+
+We would also be interested in a study of how easily both normal and expert users learn and understand the principles of our permission model and others, and how effectively they can use them.  
+We would like to know how effectively different systems are used by different demographics, both by solo experimentation and also with instruction.
 
 
 
